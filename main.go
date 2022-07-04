@@ -24,6 +24,7 @@ func createNewQR(w http.ResponseWriter, r *http.Request) {
 	id := uuid.New()
 	decoder := json.NewDecoder(r.Body)
 	imageName := fmt.Sprintf("images/%s.png", id.String())
+	imageURL := fmt.Sprintf("%s/qr-codes/%s.png", r.Host, id.String())
 
 	var urlToConvert convertUrlStruct
 
@@ -46,7 +47,7 @@ func createNewQR(w http.ResponseWriter, r *http.Request) {
 
 	data := &responseQrStruct{
 		Id:       id.String(),
-		ImageURL: fmt.Sprintf("%s/%s.png", r.Host, id.String()),
+		ImageURL: imageURL,
 	}
 	jsonData, err := json.Marshal(data)
 
