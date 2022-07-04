@@ -16,12 +16,14 @@ type convertUrlStruct struct {
 }
 
 type responseQrStruct struct {
-	Id string `json:"id"`
+	Id       string `json:"id"`
+	ImageURL string `json:"image_url"`
 }
 
-func getHome(w http.ResponseWriter, r *http.Request) {
+func createNewQR(w http.ResponseWriter, r *http.Request) {
 	id := uuid.New()
 	decoder := json.NewDecoder(r.Body)
+	imageName := fmt.Sprintf("images/%s.png", id.String())
 
 	var urlToConvert convertUrlStruct
 
@@ -31,14 +33,20 @@ func getHome(w http.ResponseWriter, r *http.Request) {
 		panic(err)
 	}
 
-	err = qrcode.WriteFile(urlToConvert.Url, qrcode.Medium, 256, "images/qr.png")
+	err = qrcode.WriteFile(
+		urlToConvert.Url,
+		qrcode.Medium,
+		256,
+		imageName,
+	)
 
 	if err != nil {
 		panic(err)
 	}
 
 	data := &responseQrStruct{
-		Id: id.String(),
+		Id:       id.String(),
+		ImageURL: fmt.Sprintf("%s/%s.png", r.Host, id.String()),
 	}
 	jsonData, err := json.Marshal(data)
 
@@ -52,12 +60,17 @@ func getHome(w http.ResponseWriter, r *http.Request) {
 
 func main() {
 	mux := http.NewServeMux()
+	port := os.Getenv("PORT")
 	fs := http.FileServer(http.Dir("images"))
 
-	mux.Handle("/qr/", http.StripPrefix("/qr", fs))
-	mux.HandleFunc("/", getHome)
+	mux.Handle("/qr-codes/", http.StripPrefix("/qr-codes", fs))
+	mux.HandleFunc("/", createNewQR)
 
-	err := http.ListenAndServe(":3333", mux)
+	if port == "" {
+		port = ":9000"
+	}
+
+	err := http.ListenAndServe(port, mux)
 
 	if errors.Is(err, http.ErrServerClosed) {
 		fmt.Printf("server closed\n")
