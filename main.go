@@ -67,10 +67,10 @@ func main() {
 	mux.HandleFunc("/", createNewQR)
 
 	if port == "" {
-		port = ":9000"
+		port = "9000"
 	}
 
-	err := http.ListenAndServe(port, mux)
+	err := http.ListenAndServe(fmt.Sprintf(":%s", port), mux)
 
 	if errors.Is(err, http.ErrServerClosed) {
 		fmt.Printf("server closed\n")
