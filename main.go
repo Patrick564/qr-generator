@@ -59,7 +59,7 @@ func createNewQR(w http.ResponseWriter, r *http.Request) {
 
 func main() {
 	mux := http.NewServeMux()
-	port := "5000"
+	port := os.Getenv("PORT")
 	fileServ := http.FileServer(http.Dir("images"))
 
 	mux.Handle("/qr-codes/", http.StripPrefix("/qr-codes", fileServ))
