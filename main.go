@@ -26,10 +26,9 @@ func createNewQR(w http.ResponseWriter, r *http.Request) {
 	imageName := fmt.Sprintf("images/%s.png", id.String())
 	imageURL := fmt.Sprintf("%s/qr-codes/%s.png", r.Host, id.String())
 
-	var urlToConvert convertUrlStruct
+	urlToConvert := &convertUrlStruct{}
 
 	err := decoder.Decode(&urlToConvert)
-
 	if err != nil {
 		panic(err)
 	}
@@ -40,7 +39,6 @@ func createNewQR(w http.ResponseWriter, r *http.Request) {
 		256,
 		imageName,
 	)
-
 	if err != nil {
 		panic(err)
 	}
@@ -49,8 +47,8 @@ func createNewQR(w http.ResponseWriter, r *http.Request) {
 		Id:       id.String(),
 		ImageURL: imageURL,
 	}
-	jsonData, err := json.Marshal(data)
 
+	jsonData, err := json.Marshal(data)
 	if err != nil {
 		panic(err)
 	}
@@ -61,23 +59,22 @@ func createNewQR(w http.ResponseWriter, r *http.Request) {
 
 func main() {
 	mux := http.NewServeMux()
-	port := os.Getenv("PORT")
-	fs := http.FileServer(http.Dir("images"))
+	port := "5000"
+	fileServ := http.FileServer(http.Dir("images"))
 
-	mux.Handle("/qr-codes/", http.StripPrefix("/qr-codes", fs))
+	mux.Handle("/qr-codes/", http.StripPrefix("/qr-codes", fileServ))
 	mux.HandleFunc("/", createNewQR)
 
-	if port == "" {
-		port = "9000"
-	}
-
 	err := http.ListenAndServe(fmt.Sprintf(":%s", port), mux)
-
 	if errors.Is(err, http.ErrServerClosed) {
 		fmt.Printf("server closed\n")
+
+		os.Exit(1)
 	} else if err != nil {
 		fmt.Printf("error starting server %s\n", err)
 
 		os.Exit(1)
 	}
+
+	fmt.Println("Server start...")
 }
