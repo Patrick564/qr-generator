@@ -12,5 +12,6 @@ go run .
 
 ## Endpoints
 
-- GET  /qr-codes                        For see all codes created in 24h
-- POST /         {"url": "url_content"} For create a QR image
+- GET  /api/codes                            For see all codes created in 24h
+- GET  /api/code/id                          For see specific qr code
+- POST /api/create   {"url": "url_content"}  For create a QR image
