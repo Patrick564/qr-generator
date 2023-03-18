@@ -5,6 +5,7 @@ import (
 	"log"
 	"net/http"
 	"os"
+	"time"
 
 	"github.com/Patrick564/qr-converter/api"
 )
@@ -12,11 +13,13 @@ import (
 func RoutesLogger(h http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		// Before request
+		startTime := time.Now()
 
 		h.ServeHTTP(w, r)
 
 		// After request
-		log.Printf("%s - %s", r.Method, r.RequestURI)
+		endTime := time.Since(startTime).String()
+		log.Printf("%s - %s - %s", endTime, r.RequestURI, r.Method)
 	})
 }
 

@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"net/http"
 
+	"github.com/Patrick564/qr-converter/utils"
 	"github.com/google/uuid"
 	"github.com/skip2/go-qrcode"
 )
@@ -19,7 +20,6 @@ type ResponseQrStruct struct {
 }
 
 func CreateNewQR(w http.ResponseWriter, r *http.Request) {
-	// log.Print("Route /api/create [GET]...")
 	w.Header().Set("Content-Type", "application/json")
 
 	id := uuid.New()
@@ -29,8 +29,16 @@ func CreateNewQR(w http.ResponseWriter, r *http.Request) {
 	urlToConvert := ConvertUrlStruct{}
 	err := json.NewDecoder(r.Body).Decode(&urlToConvert)
 	if err != nil {
+		w.WriteHeader(http.StatusBadRequest)
+		json.NewEncoder(w).Encode(utils.CustomError{Message: err.Error()})
 		return
 	}
+
+	// This is commented for future Redis implementation
+	// for saving image as array of bytes or bitmap.
+	// q, _ := qrcode.Encode(urlToConvert.Url, qrcode.Medium, 256)
+	// fmt.Println("qrcode:")
+	// fmt.Println(q)
 
 	err = qrcode.WriteFile(
 		urlToConvert.Url,
